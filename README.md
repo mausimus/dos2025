@@ -31,7 +31,7 @@ A deduction mini-game for [DOSember Game Jam 2025](https://itch.io/jam/dosember-
  ### HOW TO BUILD
 
  1. Mount as C drive in DOSBox
- 2. Install Borland C++ 3.0 in C:\BORLANDC and make sure C:\BORLANDC\BIN is on Path
+ 2. Install Borland C++ 3.0 in C:\BORLANDC and make sure C:\BORLANDC\BIN is on PATH
  3. MAKE.BAT
  4. RUN.BAT
  
