@@ -6,6 +6,10 @@ A deduction mini-game for [DOSember Game Jam 2025](https://itch.io/jam/dosember-
 
 ![Gameplay](MISC/IMAGE.PNG)
 
+### CREDITS
+ * mausimus: coding, writing
+ * joker: art, music
+
 ### HOW TO PLAY
  * you play using the mouse
  * investigate clues under question marks
