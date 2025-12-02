@@ -31,7 +31,6 @@ static PACKED_FILE packed_files[] = {
 #define NUM_FILES (sizeof(packed_files) / sizeof(PACKED_FILE))
 
 static void derle(uchar far *inp, uchar far *outp, uint clen) {
-  // clang-format off
   asm {
     push es
     push ds
@@ -66,7 +65,6 @@ rle_done:
     pop ds
     pop es
   }
-  // clang-format on
 }
 
 uint io_len(const char *filename) {

@@ -22,7 +22,6 @@ extern int game_time;
 
 void audio_init();
 void audio_end();
-void audio_beep(int freq);
 void audio_stop();
 void timer_start(uint hdsec);
 void timer_delay(uint hdsec);

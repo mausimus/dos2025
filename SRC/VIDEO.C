@@ -28,14 +28,17 @@ static int prev_time;
 static uchar far *font;
 static const uchar edge_loop[8] = {2, 3, 4, 6, 5, 4, 3, 2};
 
-// clang-format off
 static uchar palettes[4][17] = {
   {0,1,2,3,4,5,6,7,16,17,18,19,20,21,22,23,0},
   {0,1,2,3,4,5,6,16,0,1,2,3,4,5,6,7,0},
   {0,0,1,1,1,1,1,0,0,0,1,1,1,1,1,16,0},
   {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}
 };
-// clang-format on
+
+static uchar side_mask[2][7] = {{3, 7, 7, 7, 7, 7, 3},
+                                {192, 224, 224, 224, 224, 224, 192}};
+
+#include "BITMASKS.INC"
 
 void internal_putimage(uint left, uint top, void far *bitmap, uchar page);
 
@@ -76,8 +79,6 @@ void video_end() {
 
   ega_text_mode();
 }
-
-#include "BITMASKS.INC"
 
 void video_hotspot_blit(uint sx, uint sy, uint w, uint h, uint dx, uint dy,
                         uchar from_page, uchar to_page, uchar frame) {
@@ -124,9 +125,6 @@ void video_hotspot_blit(uint sx, uint sy, uint w, uint h, uint dx, uint dy,
   ega_set_bit_mask(0xFF);
   ega_set_plane_mask(0xF);
 }
-
-static uchar side_mask[2][7] = {{3, 7, 7, 7, 7, 7, 3},
-                                {192, 224, 224, 224, 224, 224, 192}};
 
 void video_draw_side(uchar page_no, uint x, uint y, uchar bg, uchar side) {
   uint p, mi;
@@ -360,7 +358,6 @@ void video_vram_blit(uchar from_page, uchar to_page, uint from_ofs,
 
   ega_set_plane_mask(0xFF);
   ega_set_bit_mask(0);
-  // clang-format off
   asm {
     push ds
     push es
@@ -385,8 +382,7 @@ line:
     pop es
     pop ds
   }
-       // clang-format on
-       ega_set_bit_mask(0xFF);
+  ega_set_bit_mask(0xFF);
 }
 
 // bitmap to VRAM copy
@@ -412,7 +408,6 @@ void video_bitmap_blit(uchar far *bitmap, uchar to_page, uint sx, uint sy,
   // v1 - line by line
   fp += (dx / 8) + dy * 80;
 
-  // clang-format off
   asm {        
     push es
     push ds
@@ -457,8 +452,8 @@ copy_line:
     jnz short copy_line
     pop ds
     pop es
-  }  // clang-format on
-            ega_set_plane_mask(0xF);
+  }
+  ega_set_plane_mask(0xF);
 }
 
 void video_copy_image(uint sx, uint sy, uint w, uint h, uint dx, uint dy,
@@ -485,7 +480,6 @@ static void video_lines(const char *c, uchar far *s, uchar inv) {
 
   ega_set_plane_mask((~inv) & 0xF);
 
-  // clang-format off
 draw_text:    
   asm {
     push ds
@@ -565,7 +559,6 @@ text_done:
     pop es
     pop ds
   }
-  // clang-format on
   if (inv) {
     ega_set_plane_mask(inv);
     inv = 0;
@@ -664,7 +657,6 @@ void video_fill(uchar page, uint x, uint y, uint w, uint h, uchar c1,
     h = 1;
   }
 
-  // clang-format off
   asm {
     push es
     mov ax, to_seg
@@ -723,8 +715,7 @@ line_db:
     jmp line_done
   }
 line_done:
-      // clang-format on
-      ega_set_bit_mask(0xFF);
+  ega_set_bit_mask(0xFF);
 }
 
 void video_clear(uchar page, uchar c) {

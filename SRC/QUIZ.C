@@ -54,7 +54,6 @@ typedef struct GAP {
 #define STORY_LINES 16
 #define NUM_GAPS 22
 
-// clang-format off
 static const char* gaps[NUM_GAPS] = {
   "",
   BANKER_FIRST,
@@ -110,7 +109,6 @@ static const char* solution =
   "to teach " BANKER_FIRST " a lesson and use his skills one\n"
   "more time for revenge on his old partner.\n\n\n"
   "                Thanks for playing!";
-// clang-format on
 
 int mouse_over_input(INPUTBOX *b) {
   return mouse_x >= b->x && mouse_x <= b->x + INPUT_W && mouse_y >= b->y &&

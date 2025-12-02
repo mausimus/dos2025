@@ -47,7 +47,7 @@ static long music_cnt, next_cnt;
 static uint wait_cnt, sound_cnt, time_cnt = TIME_CNT;
 
 static ADLIB_INST instruments[5];
-// clang-format off
+
 static ADLIB_SFX sfx[5] = {
   {0, 220, 280},
   {1, 440, 250},
@@ -55,14 +55,12 @@ static ADLIB_SFX sfx[5] = {
   {3, 880, 280},
   {4, 523, 25}
 };
-// clang-format on
 
 typedef struct {
   int stopFreq;
   long freqMult;
 } FREQ_MAP;
 
-// clang-format off
 static FREQ_MAP freq_map[8] = {
   {48, 2109},
   {97, 1054},
@@ -73,7 +71,6 @@ static FREQ_MAP freq_map[8] = {
   {3104, 32},
   {6208, 16}
 };
-// clang-format on
 
 void interrupt(far *org_handler)();
 
@@ -113,18 +110,12 @@ void interrupt isr_handler()  // new ISR handler
 }
 
 static void next_cmd() {
-  //char msg[40];
-  //sprintf(msg, "%u %u %lu %lu   ", song->ofs, song->len, music_cnt, next_cnt);
-  //video_text(0, msg, 0, 0, 15, 0);
-
   if (song->ofs >= song->len) {
     if (song == &song1) {
       // second part
       song = &song2;
-      //video_text(0, "PART 2", 0, 0, 15, 0);
     } else {
       // loop
-      //video_text(0, "PART 1", 0, 0, 15, 0);
       song = &song1;
       music_cnt = 0;
       next_cnt = 0;
@@ -189,26 +180,6 @@ void audio_end() {
     setvect(8, org_handler);
     audio_stop();
   }
-}
-
-void audio_beep(int freq) {
-#ifndef NO_AUDIO
-  uint div = (uint)(TIMER_BASE / freq);
-  uchar tmp;
-
-  outportb(0x43, 0xB6);
-  outportb(0x42, (char)div);
-  outportb(0x42, (char)(div >> 8));
-
-  tmp = inportb(0x61);
-  outportb(0x61, tmp | 3);
-
-  timer_delay(2);
-
-  // stop
-  tmp = inportb(0x61) & 0xfc;
-  outportb(0x61, tmp);
-#endif
 }
 
 static void play_freq(uchar voice, int freq) {

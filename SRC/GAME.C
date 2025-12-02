@@ -113,7 +113,7 @@ static VIEW *init_vault() {
   temp2 = add_text(temp, 186, 82, "2,628 Shillings", STYLE_DEFAULT);
   add_view(vault, 386, 76, temp);
 
-#include "vault.inc"
+  #include "VAULT.INC"
 
   return vault;
 }
@@ -236,7 +236,7 @@ static VIEW *init_lobby() {
   add_clue(temp, "revenge", NULL, Noun);
   add_view(lobby, 538, 135, temp);
 
-  #include "lobby.inc"
+  #include "LOBBY.INC"
 
   return lobby;
 }
@@ -343,7 +343,7 @@ static VIEW *init_bathroom() {
   temp = create_image_view("BATHROOM\\CIGARETT.RMG");
   add_view(bathroom, 320, 144, temp);
 
-  #include "bathroom.inc"
+  #include "BATHROOM.INC"
 
   return bathroom;
 }
