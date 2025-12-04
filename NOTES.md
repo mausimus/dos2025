@@ -71,8 +71,8 @@ but that only helped a bit.
 to get the compiler to produce correct output, the option to generate assembly sources and/or IDA are your friends.
 * The warnings are not exhaustive, you can mix up near and far pointers and not be told about it.
 * Built-in BGI graphics library is great for prototyping but _terrible_ for performance. I used
-it early on for prototyping and tore out eventually.
-* Some of the `_dos_*` functions were extremely slow under DOSBox have and I had to rewrite them myself.
+it early on and tore out eventually.
+* Some of the `_dos_*` functions were extremely slow under DOSBox and I had to rewrite them.
 
 ### Development setup
 
