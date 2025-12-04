@@ -46,6 +46,15 @@ static uint word_x = 8;
 static uint word_y;
 static WORD words[MAX_WORDS];
 static int story_stat = 2, portraits_stat = 2;
+static uchar paragraph_stat[5] = {2, 2, 2, 2, 2};
+static const uint paragraph_y[5] = {5, 31, 57, 83, 109};
+static const uint paragraph_h[5] = {20, 20, 20, 20, 40};
+
+#define NUM_INPUTS 41
+
+static const uchar paragraph_map[NUM_INPUTS] = {
+    0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 3,
+    3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4};
 
 typedef struct GAP {
   CLUE *clue;
@@ -277,6 +286,11 @@ static void redraw_quiz() {
   }
   draw_status(" Portraits:   Correct! ", STATUS_LX, STATUS_GOOD);
   draw_status(" Story:       Correct! ", STATUS_RX, STATUS_GOOD);
+
+  for (i = 0; i < 5; i++) {
+    video_fill(QUIZ_PAGE, 632, paragraph_y[i], 8, paragraph_h[i], STATUS_GOOD, STATUS_GOOD);
+  }
+
   mouse_show();
 }
 
@@ -444,105 +458,117 @@ void quiz_explain() {
 void quiz_check() {
   uint i;
   int story = 2, portraits = 2;
+  uchar paragraph[5] = {0, 0, 0, 0, 0};
+  uchar incorrect = 0;
   INPUTBOX *box = inputs;
-  {
-    for (i = 0; i < num_inputs && story; i++) {
-      if (box->word == NULL || box->word == words) {
-        story = 0;
-      }
-      box++;
+  for (i = 0; i < num_inputs && story; i++) {
+    if (box->word == NULL || box->word == words) {
+      story = 0;
     }
-    box = inputs;
-    if (story == 2) {
-      uchar incorrect = 0;
-      for (i = 0; i < num_inputs && !incorrect; i++) {
-        switch (i) {
-          case 0: {
-            // accept either order
-            CLUE *robber_clue = find_clue(ROBBER_FIRST);
-            CLUE *banker_clue = find_clue(BANKER_FIRST);
-            INPUTBOX *box2 = inputs + 1;
-            if (box->word->clue == robber_clue &&
-                box2->word->clue == banker_clue)
-              break;
-            if (box->word->clue == banker_clue &&
-                box2->word->clue == robber_clue)
-              break;
-            incorrect = 1;
-            break;
-          }
-          case 1:
-            break;
-          case 23: {
-            // accept either word
-            CLUE *necklace_clue = find_clue("necklace");
-            CLUE *passkey_clue = find_clue("passkey");
-            ASSERT(box->clue == necklace_clue);
-            if (box->word->clue != necklace_clue &&
-                box->word->clue != passkey_clue)
-              incorrect = 1;
-            break;
-          }
-          default:
-            if (box->word->clue != box->clue) {
-              incorrect = 1;
-            }
-            break;
+    box++;
+  }
+  box = inputs;
+  if (num_inputs != NUM_INPUTS)
+    fatal_error("Invalid number of inputs!");
+  for (i = 0; i < num_inputs; i++) {
+    switch (i) {
+      case 0: {
+        // accept either order
+        CLUE *robber_clue = find_clue(ROBBER_FIRST);
+        CLUE *banker_clue = find_clue(BANKER_FIRST);
+        INPUTBOX *box2 = inputs + 1;
+        if (box->word->clue == robber_clue &&
+            box2->word->clue == banker_clue)
+          break;
+        if (box->word->clue == banker_clue &&
+            box2->word->clue == robber_clue)
+          break;
+        incorrect = 1;
+        paragraph[paragraph_map[i]] = 1;
+        break;
+      }
+      case 1:
+        break;
+      case 23: {
+        // accept either word
+        CLUE *necklace_clue = find_clue("necklace");
+        CLUE *passkey_clue = find_clue("passkey");
+        ASSERT(box->clue == necklace_clue);
+        if (box->word->clue != necklace_clue &&
+            box->word->clue != passkey_clue) {
+          incorrect = 1;
+          paragraph[paragraph_map[i]] = 1;
         }
-        box++;
+        break;
       }
-      if (incorrect)
-        story = 1;
+      default:
+        if (box->word->clue != box->clue) {
+          incorrect = 1;
+          paragraph[paragraph_map[i]] = 1;
+        }
+        break;
     }
+    box++;
+  }
+  if (incorrect && story == 2)
+    story = 1;
 
-    if (story_stat != story) {
-      story_stat = story;
-      mouse_hide();
-      switch (story) {
-        case 0:
-          draw_status(" Story:     Incomplete ", STATUS_RX, STATUS_BAD);
-          break;
-        case 1:
-          draw_status(" Story:      Incorrect ", STATUS_RX, STATUS_BAD);
-          break;
-        case 2:
-          draw_status(" Story:       Correct! ", STATUS_RX, STATUS_GOOD);
-          break;
-      }
-      mouse_show();
+  if (story_stat != story) {
+    story_stat = story;
+    mouse_hide();
+    switch (story) {
+      case 0:
+        draw_status(" Story:     Incomplete ", STATUS_RX, STATUS_BAD);
+        break;
+      case 1:
+        draw_status(" Story:      Incorrect ", STATUS_RX, STATUS_BAD);
+        break;
+      case 2:
+        draw_status(" Story:       Correct! ", STATUS_RX, STATUS_GOOD);
+        break;
     }
+    mouse_show();
+  }
 
-    // check portraits
-    portraits = inputs_check();
-    if (portraits_stat != portraits) {
-      portraits_stat = portraits;
-      mouse_hide();
-      switch (portraits) {
-        case 0:
-          draw_status(" Portraits: Incomplete ", STATUS_LX, STATUS_BAD);
-          break;
-        case 1:
-          draw_status(" Portraits:  Incorrect ", STATUS_LX, STATUS_BAD);
-          break;
-        case 2:
-          draw_status(" Portraits:   Correct! ", STATUS_LX, STATUS_GOOD);
-          break;
-      }
-      mouse_show();
+  // check portraits
+  portraits = inputs_check();
+  if (portraits_stat != portraits) {
+    portraits_stat = portraits;
+    mouse_hide();
+    switch (portraits) {
+      case 0:
+        draw_status(" Portraits: Incomplete ", STATUS_LX, STATUS_BAD);
+        break;
+      case 1:
+        draw_status(" Portraits:  Incorrect ", STATUS_LX, STATUS_BAD);
+        break;
+      case 2:
+        draw_status(" Portraits:   Correct! ", STATUS_LX, STATUS_GOOD);
+        break;
     }
+    mouse_show();
+  }
 
-    if (!completed && story_stat == 2 && portraits_stat == 2) {
-      completed = 1;
-      mouse_hide();
-      activebox = NULL;
-      if (redrawbox) {
-        draw_quiz_input(redrawbox);
-        redrawbox = NULL;
-      }
-      quiz_explain();
-      audio_sfx(SFX_WON);
-      mouse_show();
+  // check paragraphs
+  for (i = 0; i < 5; i++) {
+    if (paragraph[i] != paragraph_stat[i]) {
+      uchar col = paragraph[i] == 0 ? STATUS_GOOD : STATUS_BAD;
+      paragraph_stat[i] = paragraph[i];
+      video_fill(QUIZ_PAGE, 632, paragraph_y[i], 8, paragraph_h[i], col, col);
     }
+  }
+
+  if (!completed && story_stat == 2 && portraits_stat == 2) {
+    completed = 1;
+    mouse_hide();
+    activebox = NULL;
+    if (redrawbox) {
+      draw_quiz_input(redrawbox);
+      redrawbox = NULL;
+    }
+    quiz_explain();
+    audio_sfx(SFX_WON);
+    mouse_show();
   }
 }
 
