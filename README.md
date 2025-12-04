@@ -35,3 +35,5 @@ A deduction mini-game for [DOSember Game Jam 2025](https://itch.io/jam/dosember-
  3. MAKE.BAT
  4. RUN.BAT
  
+ I've also written down some [notes on programming in real-mode DOS with EGA and AdLib](NOTES.md) in
+ case I wanted to revisit this landscape in the future. :crossed_fingers:
