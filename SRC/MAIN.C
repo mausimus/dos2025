@@ -196,9 +196,11 @@ static void update_cursor() {
 
 static void check_keyboard() {
   keyboard_poll();
+#ifndef WEB  
   if (keyboard_c == KEY_ESC) {
     quitting = 1;
   }
+#endif  
 #ifdef DEBUG
   if (keyboard_c == 's') {
     ega_set_active_page(SPRITE_PAGE);
