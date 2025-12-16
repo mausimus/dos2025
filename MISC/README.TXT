@@ -27,6 +27,7 @@ HOW TO PLAY
  * collect words underlined in red
  * use arrows on the sides to switch locations
  * assign names you found to character portraits
+ * assign senders and recipients to letters
  * press TO QUIZ button to enter the quiz screen
  * fill in blanks in the Quiz using words you collected
  * the Quiz will accept synonyms and alternative order

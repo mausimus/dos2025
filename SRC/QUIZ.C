@@ -21,8 +21,9 @@
 #define MAX_INPUTS 50
 #define INPUT_W (MAX_INPUT * 8)
 #define INPUT_H 9
-#define STATUS_LX (208 - 12 * 8)
-#define STATUS_RX (448 - 12 * 8)
+#define STATUS_LX (208 - 12 * 8 - 80)
+#define STATUS_CX (328 - 12 * 8)
+#define STATUS_RX (448 - 12 * 8 + 80)
 #define STATUS_Y 157
 #define STATUS_BAD 4
 #define STATUS_GOOD 2
@@ -45,16 +46,16 @@ static uchar num_words;
 static uint word_x = 8;
 static uint word_y;
 static WORD words[MAX_WORDS];
-static int story_stat = 2, portraits_stat = 2;
+static int story_stat = 2, portraits_stat = 2, notes_stat = 2;
 static uchar paragraph_stat[5] = {2, 2, 2, 2, 2};
 static const uint paragraph_y[5] = {5, 31, 57, 83, 109};
 static const uint paragraph_h[5] = {20, 20, 20, 20, 40};
 
-#define NUM_INPUTS 41
+#define NUM_INPUTS 42
 
 static const uchar paragraph_map[NUM_INPUTS] = {
     0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 3,
-    3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4};
+    3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4};
 
 typedef struct GAP {
   CLUE *clue;
@@ -63,6 +64,7 @@ typedef struct GAP {
 #define STORY_LINES 16
 #define NUM_GAPS 22
 
+// clang-format off
 static const char* gaps[NUM_GAPS] = {
   "",
   BANKER_FIRST,
@@ -75,7 +77,7 @@ static const char* gaps[NUM_GAPS] = {
   "passkey",
   "stolen",
   GIRL_FIRST,
-  "Heinrich",
+  FATHER_FIRST,
   "necklace",
   "date",
   "safe",
@@ -103,8 +105,8 @@ static char* story[STORY_LINES] = {
   "",
   "The [\x0E________] was [\x0F________] into by [\x07________] and [\x10________] by",
   "[\x02________]. [\x02________] [\x11________] the [\x05________] in the [\x0E________]",
-  "to mark his [\x06________], and [\x11________] the [\x08________] to frame",
-  "[\x01________] into the [\x12________]."
+  "to mark his [\x06________], and [\x11________] the [\x08________] with the",
+  "[\x13________] to frame [\x01________] into the [\x12________]."
 };
 
 static const char* solution =
@@ -114,10 +116,12 @@ static const char* solution =
   "went to prison.\n\n"
   "  Now " BANKER_FIRST " has been scamming ordinary people\n"
   "using a sham banking house. After coming out of\n"
-  "prison and seeing what's happening, " ROBBER_FIRST " decided\n"
-  "to teach " BANKER_FIRST " a lesson and use his skills one\n"
-  "more time for revenge on his old partner.\n\n\n"
+  "prison, seeing what's happening and insulted by\n"
+  BANKER_FIRST "'s payoff attempt, " ROBBER_FIRST " decided to teach\n"
+  BANKER_FIRST " a lesson and use his skills one more time\n"
+  "for revenge on his old partner.\n\n\n"
   "                Thanks for playing!";
+// clang-format on
 
 int mouse_over_input(INPUTBOX *b) {
   return mouse_x >= b->x && mouse_x <= b->x + INPUT_W && mouse_y >= b->y &&
@@ -285,6 +289,7 @@ static void redraw_quiz() {
     draw_quiz_input(inputs + i);
   }
   draw_status(" Portraits:   Correct! ", STATUS_LX, STATUS_GOOD);
+  draw_status(" Letters:     Correct! ", STATUS_CX, STATUS_GOOD);
   draw_status(" Story:       Correct! ", STATUS_RX, STATUS_GOOD);
 
   for (i = 0; i < 5; i++) {
@@ -457,7 +462,7 @@ void quiz_explain() {
 
 void quiz_check() {
   uint i;
-  int story = 2, portraits = 2;
+  int story = 2, portraits = 2, notes = 2;
   uchar paragraph[5] = {0, 0, 0, 0, 0};
   uchar incorrect = 0;
   INPUTBOX *box = inputs;
@@ -549,6 +554,25 @@ void quiz_check() {
     mouse_show();
   }
 
+  // check notes
+  notes = notes_check();
+  if (notes_stat != notes) {
+    notes_stat = notes;
+    mouse_hide();
+    switch (notes) {
+      case 0:
+        draw_status(" Letters:   Incomplete ", STATUS_CX, STATUS_BAD);
+        break;
+      case 1:
+        draw_status(" Letters:    Incorrect ", STATUS_CX, STATUS_BAD);
+        break;
+      case 2:
+        draw_status(" Letters:     Correct! ", STATUS_CX, STATUS_GOOD);
+        break;
+    }
+    mouse_show();
+  }
+
   // check paragraphs
   for (i = 0; i < 5; i++) {
     if (paragraph[i] != paragraph_stat[i]) {
@@ -558,7 +582,7 @@ void quiz_check() {
     }
   }
 
-  if (!completed && story_stat == 2 && portraits_stat == 2) {
+  if (!completed && story_stat == 2 && portraits_stat == 2 && notes_stat == 2) {
     completed = 1;
     mouse_hide();
     activebox = NULL;

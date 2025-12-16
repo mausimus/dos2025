@@ -34,7 +34,7 @@ static VIEW *init_vault() {
       vault, 444, 84, "VAULT\\BANKER_I.RMG", "VAULT\\BANKER.RMG",
       "Surely it's that welder's boy, " BOY_FIRST "!", BANKER_FIRST);
   add_clue(temp, BOY_FIRST, NULL, Person);
-  temp2 = add_text_item(temp, 0,
+  temp2 = add_text_item_input(temp, 0,
                         ""
                         "Thank you for a wonderful evening.\n"
                         "I'm so glad I was able to change your\n"
@@ -43,18 +43,18 @@ static VIEW *init_vault() {
                         "I'm very clumsy with these things.\n"
                         "I will buy you a dozen new ones, My\n"
                         "Sweet Thing.\n\n" BANKER_FIRST,
-                        STYLE_JAGGED);
+                        STYLE_JAGGED, BANKER_FIRST, GIRL_FIRST);
   add_clue(temp2, BANKER_FIRST, NULL, Person);
-  add_text_item(
+  add_text_item_input(
       temp, 1,
       ""
       "He's coming out today, sir.\n"
       "  How many years has it been? 4? 5? Feels too soon.\n"
-      "  We'd hate to see him go back to his old ways, wouldn't we.\n"
+      "  We'd hate to see things getting messy again, would we.\n"
       "I will make the arrangements.\n"
       "  Don't go overboard, it might get expensive.\n"
       "He took it, sir.",
-      STYLE_JAGGED);
+      STYLE_JAGGED, ASSISTANT_FIRST, BANKER_FIRST);
   add_text_item(temp, 2, "Pack of cigarettes.", STYLE_DEFAULT);
 
   // Assistant
@@ -99,7 +99,7 @@ static VIEW *init_vault() {
   temp2 = create_text_view("FINGERPRINTS COLLECTED\n\nMr. " BOY_LAST
                            "      \nMr. " ROBBER_LAST "\nMs. " GIRL_LAST
                            "\nMr. " BANKER_LAST "\nMr. " ASSISTANT_LAST,
-                           STYLE_PRINT);
+                           STYLE_PRINT, 0);
   add_view(temp2, 112, 9 + 19, create_fingerprint_view("VAULT\\PRINT4.RMG"));
   add_view(temp2, 112, 18 + 19, create_fingerprint_view("VAULT\\PRINT2.RMG"));
   add_view(temp2, 112, 27 + 19, create_fingerprint_view("VAULT\\PRINT3.RMG"));
@@ -145,7 +145,7 @@ static VIEW *init_lobby() {
   // Girl
   temp = add_inventory(lobby, 227, 50, "LOBBY\\GIRL_I.RMG", "LOBBY\\GIRL.RMG",
                        "That's absurd! Do you know who I am?!", GIRL_FIRST);
-  temp2 = add_text_item(
+  temp2 = add_text_item_input(
       temp, 0,
       ""
       "Dear " GIRL_FIRST
@@ -157,10 +157,10 @@ static VIEW *init_lobby() {
       "Your access has been revoked and you will no longer\n"
       "be included in my will.\n\n"
       "I wish you all the best with the choices you've made.\n\n"
-      "Your Father, Heinrich August " GIRL_LAST,
-      STYLE_JAGGED);
+      "Your Father, " FATHER_FIRST " August " GIRL_LAST,
+      STYLE_JAGGED, FATHER_FIRST, GIRL_FIRST);
   add_text_item(temp, 1, "Pack of cigarettes.", STYLE_DEFAULT);
-  add_clue(temp2, "Heinrich", NULL, Person);
+  add_clue(temp2, FATHER_FIRST, NULL, Person);
   add_clue(temp2, GIRL_FIRST, NULL, Person);
 
   // Boyfriend
@@ -172,18 +172,18 @@ static VIEW *init_lobby() {
                     STYLE_DEFAULT),
            "necklace", NULL, Noun);
   add_view_item(temp, 0, temp2);
-  temp2 = add_text_item(
+  temp2 = add_text_item_input(
       temp, 1,
       "Old fool! I stole it right from under his nose.\nIt fits perfectly. "
       "Today's the date.\nBe by my window at 8pm and I will drop it.\n\nLove "
       "XXX",
-      STYLE_JAGGED);
+      STYLE_JAGGED, GIRL_FIRST, BOY_FIRST);
   add_clue(temp2, "date", NULL, Noun);
-  add_text_item(
+  add_text_item_input(
       temp, 2,
       "Leave this with me.\n\nIf you do as I say, you can get it all "
       "back.",
-      STYLE_JAGGED);
+      STYLE_JAGGED, ROBBER_FIRST, BOY_FIRST);
   add_text_item(temp, 3, "Pack of cigarettes.", STYLE_DEFAULT);
 
   // Policeman
@@ -225,14 +225,14 @@ static VIEW *init_lobby() {
   temp = create_text_view(
       "Convicted Bank Robber\n\nCaught after having been betrayed by\nhis "
       "partner and recently released.",
-      STYLE_HAND);
+      STYLE_HAND, 0);
   add_clue(temp, "partner", "partners", Noun);
   add_view(lobby, 580, 143, temp);
 
   temp = create_text_view(
       "Disgruntled Customer\n\nSwore revenge on our bank after his\nparents' "
       "investments underperformed.\nDo not serve.",
-      STYLE_HAND);
+      STYLE_HAND, 0);
   add_clue(temp, "revenge", NULL, Noun);
   add_view(lobby, 538, 135, temp);
 
@@ -319,11 +319,13 @@ static VIEW *init_bathroom() {
                 STYLE_PRINT);
   add_text_item(temp, 2,
                 ""
-                "  2190\n"
-                "   120\n"
-                "  438\n"
-                " 219 \n"
-                " 262800",
+                "  \xa2\xa1\xa9\xa0\n"
+                "   \xa1\xa2\xa0      \xa3\xa6\xa5\n"
+                "\xc4\xc5\xc5\xc5\xc4\xc4\xc6\xc6      \xa6\n"
+                "  \xa4\xa3\xa8     \xc5\xc5\xc4\xc4\xc4\xc6\n"
+                " \xa2\xa1\xa9       \xa2\xa1\xa9\xa0\n"
+                "\xc4\xc4\xc6\xc6\xc6\xc4\xc4\xc5\n"
+                " \xa2\xa6\xa2\xa8\xa0\xa0",
                 STYLE_JAGGED);
 
   add_text_item(temp, 3, "Pack of cigarettes.", STYLE_DEFAULT);
@@ -375,9 +377,13 @@ void init_scene(VIEW *scene) {
   if (scene->id == VIEW_TRANSITION)
     return;
 
-  if (scene->input) {
-    scene->input->x += scene->popup.x;
-    scene->input->y += scene->popup.y;
+  if (scene->input1) {
+    scene->input1->x += scene->popup.x;
+    scene->input1->y += scene->popup.y;
+  }
+  if (scene->input2) {
+    scene->input2->x += scene->popup.x;
+    scene->input2->y += scene->popup.y;
   }
   while (c) {
     c->x += scene->popup.x;

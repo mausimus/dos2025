@@ -102,8 +102,10 @@ typedef struct VIEW {
   uint num_targets;
   uchar hs_w;
   uchar hs_h;
-  const char* clue;
-  INPUTBOX *input;
+  const char* clue1;
+  const char* clue2;
+  INPUTBOX *input1;
+  INPUTBOX *input2;
   POPUP popup;           // background
   SPRITE *sprites;       // animations (list)
   struct VIEW *targets;  // places to go from here
@@ -121,7 +123,7 @@ void load_scene(VIEW *v);
 void animate(SPRITE *s);
 SPRITE *create_sprite(const char *filename, int frames);
 VIEW *create_image_view(const char *filename);
-VIEW *create_text_view(const char *message, STYLE style);
+VIEW *create_text_view(const char *message, STYLE style, uchar inputs);
 VIEW *create_inventory_view(const char *inventory, const char *portrait,
                             const char *dialog, const char *input);
 VIEW *create_fingerprint_view(const char *filename);
@@ -131,6 +133,7 @@ SPRITE *add_text_sprite(VIEW *view, int x, int y, const char *text);
 VIEW *add_view(VIEW *parent, int x, int y, VIEW *child);
 VIEW *add_text(VIEW *parent, int x, int y, const char *message, STYLE style);
 VIEW *add_text_item(VIEW *parent, int no, const char *message, STYLE style);
+VIEW *add_text_item_input(VIEW *parent, int no, const char *message, STYLE style, const char* input1, const char* input2);
 VIEW *add_view_item(VIEW *parent, int no, VIEW *child);
 CLUE *create_clue(const char *text);
 CLUE *add_clue(VIEW *view, const char *text, const char *word,
@@ -143,6 +146,7 @@ void add_transition(VIEW *from, int x, int y, VIEW *to);
 void lookup_clues(WORD* wildcardw);
 CLUE *find_clue(const char *text);
 int inputs_check();
+int notes_check();
 void show_all_clues();
 
 #endif

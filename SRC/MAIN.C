@@ -24,7 +24,7 @@
 #include "UTIL.H"
 #include "VIDEO.H"
 
-static uchar input_active;
+static INPUTBOX* input_active;
 
 static void draw_hotspots() {
   VIEW *t = current_view->targets;
@@ -48,11 +48,17 @@ static void draw_sprites() {
 
 static void draw_inputs() {
   VIEW *v = current_view;
-  if (v->input) {
-    if (v->input->clue)
-      draw_input(v->input, 0, input_active);
+  if (v->input1) {
+    if (v->input1->clue)
+      draw_input(v->input1, 0, input_active != NULL);
     else
-      video_text(0, v->clue, v->input->x, v->input->y, 15, 0);
+      video_text(0, v->clue1, v->input1->x, v->input1->y, 15, 0);
+  }
+  if (v->input2) {
+    if (v->input2->clue)
+      draw_input(v->input2, 0, input_active != NULL);
+    else
+      video_text(0, v->clue2, v->input2->x, v->input2->y, 15, 0);
   }
 }
 
@@ -73,16 +79,18 @@ static int clicked_hotspot() {
       mouse_hide();
       if (t->id == VIEW_TRANSITION) {
         game_switch_scene(t->targets);
-        input_active = 0;
+        input_active = NULL;
         draw_sprites();
         draw_hotspots();
       } else {
         // switch to this view
         audio_sfx(SFX_LOOK);
         if (input_active) {
-          input_active = 0;
-          if (current_view->input)
-            draw_input(current_view->input, 0, 0);
+          input_active = NULL;
+          if (current_view->input1)
+            draw_input(current_view->input1, 0, 0);
+          if (current_view->input2)
+            draw_input(current_view->input2, 0, 0);
         }
         game_push_view(t);
         show_view(t);
@@ -113,15 +121,22 @@ static int clicked_clue() {
 }
 
 static int clicked_input() {
-  uchar new_active = 0;
-  if (current_view->input && current_view->input->clue &&
-      mouse_over_input(current_view->input) && !completed) {
-    new_active = 1;
+  INPUTBOX* new_active = NULL;
+  if (current_view->input1 && current_view->input1->clue &&
+      mouse_over_input(current_view->input1) && !completed) {
+    new_active = current_view->input1;
+  }
+  if (current_view->input2 && current_view->input2->clue &&
+      mouse_over_input(current_view->input2) && !completed) {
+    new_active = current_view->input2;
   }
   if (input_active != new_active) {
     input_active = new_active;
     mouse_hide();
-    draw_input(current_view->input, 0, input_active);
+    if(current_view->input1)
+      draw_input(current_view->input1, 0, input_active == current_view->input1);
+    if(current_view->input2)
+      draw_input(current_view->input2, 0, input_active == current_view->input2);
     mouse_show();
     audio_sfx(SFX_DROP);
     return 1;
@@ -132,17 +147,17 @@ static int clicked_input() {
 static int clicked_word() {
   WORD *w;
 
-  if (!input_active || !current_view->input || completed)
+  if (!input_active || !current_view->input1 || completed)
     return 0;
 
   w = word_clicked();
   if (w) {
-    current_view->input->word = w;
-    input_active = 0;
+    input_active->word = w;
     audio_sfx(SFX_DROP);
     mouse_hide();
-    draw_input(current_view->input, 0, input_active);
+    draw_input(input_active, 0, 0);
     mouse_show();
+    input_active = NULL;
     return 1;
   }
 
@@ -184,8 +199,10 @@ static void update_cursor() {
       }
       t = t->next;
     }
-    if (current_view->input && current_view->input->clue && !completed) {
-      if (mouse_over_input(current_view->input))
+    if (current_view->input1 && current_view->input1->clue && !completed) {
+      if (mouse_over_input(current_view->input1))
+        c = M_CURSOR_NOTE;
+      if (current_view->input2 != NULL && mouse_over_input(current_view->input2))
         c = M_CURSOR_NOTE;
       if (input_active && mouse_over_any_word())
         c = M_CURSOR_NOTE;

@@ -15,12 +15,13 @@
 #define BOY_FIRST "Jacek"
 #define BOY_LAST "Du\x89""ek"
 #define ROBBER_FIRST "Mat\x88j"
-#define ROBBER_LAST "Koz\xa0r"
+#define ROBBER_LAST "Koz\x9cr"
 #define BANKER_FIRST "Lorenz"
 #define BANKER_INITIAL "L."
 #define BANKER_LAST "Gr\x94""del"
 #define ASSISTANT_FIRST "Leon"
 #define ASSISTANT_LAST "Brotz"
+#define FATHER_FIRST "Heinrich"
 
 extern VIEW *current_view;
 extern VIEW *parent_view;

@@ -265,10 +265,21 @@ void video_show_view(VIEW *view) {
     }
 
     if (popup->w && !(popup->style & STYLE_BORDERLESS)) {
-      video_fill(0, popup->x + 8, popup->y + LINE_HEIGHT, popup->w - 16,
-                 popup->h - 2 * LINE_HEIGHT, bg, bg);
-      video_draw_edge(0, popup->x, popup->y, popup->w, popup->h, eg, bg,
-                      popup->style);
+      if(view->input2) {
+        video_fill(0, popup->x + 8, popup->y + LINE_HEIGHT, popup->w - 16,
+                   popup->h - 3 * LINE_HEIGHT, bg, bg);
+        video_fill(0, popup->x, popup->y + popup->h - LINE_HEIGHT, popup->w,
+                   LINE_HEIGHT, 8, 8);
+        video_draw_edge(0, popup->x, popup->y, popup->w,
+                        popup->h - LINE_HEIGHT, eg, bg,
+                        popup->style);
+      }
+      else {
+        video_fill(0, popup->x + 8, popup->y + LINE_HEIGHT, popup->w - 16,
+                   popup->h - 2 * LINE_HEIGHT, bg, bg);
+        video_draw_edge(0, popup->x, popup->y, popup->w, popup->h, eg, bg,
+                        popup->style);
+      }
     } else {
       video_fill(0, popup->x, popup->y, popup->w, popup->h, bg, bg);
     }
@@ -276,6 +287,12 @@ void video_show_view(VIEW *view) {
     if (popup->style == STYLE_JAGGED) {
       video_draw_edge(0, popup->x - 8, popup->y - LINE_HEIGHT, popup->w + 16,
                       popup->h + 2 * LINE_HEIGHT, 7, 8, STYLE_HAND);
+    }
+
+    if(view->input2) {
+      uint ih = popup->y + popup->h - LINE_HEIGHT + 4;
+      video_text(0, "From:", view->input1->x - 48, ih, 7, 8);
+      video_text(0, "To:", view->input2->x - 32, ih, 7, 8);
     }
 
     if (view->id == VIEW_INVENTORY)

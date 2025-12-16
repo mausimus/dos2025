@@ -20,6 +20,7 @@
 #define MAX_SPRITES 40
 #define MAX_CLUES 50
 #define MAX_INPUTS 10
+#define MAX_NOTES 12
 
 SPRITE s_hotspot = {0, 32, 16, 8, 3, "GAME\\SPRITES.RMG", NULL, 0, NULL};
 
@@ -34,6 +35,8 @@ static uchar clue_idx;
 static CLUE clues[MAX_CLUES];
 static uchar input_idx;
 static INPUTBOX inputs[MAX_INPUTS];
+static uchar note_idx;
+static INPUTBOX notes[MAX_NOTES];
 
 void load_view(VIEW *view, uchar level);
 static void load_popup(POPUP *popup);
@@ -104,7 +107,7 @@ void add_transition(VIEW *from, int x, int y, VIEW *to) {
   transition->hs_h = 14;
 }
 
-VIEW *create_text_view(const char *message, STYLE style) {
+VIEW *create_text_view(const char *message, STYLE style, uchar inputs) {
   uint max_width = 0;
   uint width = 0;
   uint num_lines = 1;
@@ -134,10 +137,15 @@ VIEW *create_text_view(const char *message, STYLE style) {
 
   if (max_width % 2 == 1)
     max_width++;
+
   v->popup.w = max_width * 8 + 32;
   v->popup.h = (num_lines + 2) * LINE_HEIGHT;
   v->popup.x = (320 - v->popup.w / 2) & 0xFFF8;
   v->popup.y = 85 - v->popup.h / 2;
+  if(inputs) {
+    v->popup.y -= LINE_HEIGHT / 2;
+    v->popup.h += LINE_HEIGHT;
+  }
   return v;
 }
 
@@ -164,12 +172,12 @@ VIEW *create_inventory_view(const char *inventory, const char *portrait,
     }
   }
   if (input) {
-    v->input = inputs + input_idx++;
-    v->input->x = 16;
-    v->input->y = 73;
-    v->clue = input;
-    v->input->clue = NULL;
-    v->input->word = NULL;
+    v->input1 = inputs + input_idx++;
+    v->input1->x = 16;
+    v->input1->y = 73;
+    v->clue1 = input;
+    v->input1->clue = NULL;
+    v->input1->word = NULL;
   }
   return v;
 }
@@ -211,17 +219,38 @@ VIEW *add_view(VIEW *parent, int x, int y, VIEW *child) {
 }
 
 VIEW *add_text(VIEW *parent, int x, int y, const char *message, STYLE style) {
-  VIEW *v = create_text_view(message, style);
+  VIEW *v = create_text_view(message, style, 0);
   add_view(parent, x, y, v);
   return v;
 }
 
 VIEW *add_text_item(VIEW *parent, int no, const char *message, STYLE style) {
-  VIEW *v = create_text_view(message, style);
+  VIEW *v = create_text_view(message, style, 0);
   add_view(parent, INV_X + no * INV_S, INV_Y, v);
   v->id = VIEW_ITEM;
   v->hs_w = INV_W;
   v->hs_h = INV_H;
+  return v;
+}
+
+VIEW *add_text_item_input(VIEW *parent, int no, const char *message, STYLE style, const char* input1, const char* input2) {
+  VIEW *v = create_text_view(message, style, 1);
+  add_view(parent, INV_X + no * INV_S, INV_Y, v);
+  v->id = VIEW_ITEM;
+  v->hs_w = INV_W;
+  v->hs_h = INV_H;
+  v->input1 = notes + note_idx++;
+  v->input1->x = 24 + ((v->popup.w - 248) / 2) & 0xFFF8;
+  v->input1->y = v->popup.h - LINE_HEIGHT + 4;
+  v->clue1 = input1;
+  v->input1->clue = NULL;
+  v->input1->word = NULL;
+  v->input2 = notes + note_idx++;
+  v->input2->x = v->input1->x + 160;
+  v->input2->y = v->popup.h - LINE_HEIGHT + 4;
+  v->clue2 = input2;
+  v->input2->clue = NULL;
+  v->input2->word = NULL;
   return v;
 }
 
@@ -418,9 +447,13 @@ void lookup_clues(WORD *wildcardw) {
   uint i;
   for (i = 0; i < view_idx; i++) {
     VIEW *v = views + i;
-    if (v->clue) {
-      v->input->clue = find_clue(v->clue);
-      v->input->word = wildcardw;
+    if (v->clue1) {
+      v->input1->clue = find_clue(v->clue1);
+      v->input1->word = wildcardw;
+    }
+    if (v->clue2) {
+      v->input2->clue = find_clue(v->clue2);
+      v->input2->word = wildcardw;
     }
   }
 }
@@ -434,6 +467,21 @@ int inputs_check() {
   }
   for (i = 0; i < input_idx; i++) {
     INPUTBOX *input = inputs + i;
+    if (input->clue && input->word && input->word->clue != input->clue)
+      return 1;  // incorrect
+  }
+  return 2;
+}
+
+int notes_check() {
+  uint i;
+  for (i = 0; i < note_idx; i++) {
+    INPUTBOX *input = notes + i;
+    if (input->clue && input->word && input->word->clue == wildcard)
+      return 0;  // incomplete
+  }
+  for (i = 0; i < note_idx; i++) {
+    INPUTBOX *input = notes + i;
     if (input->clue && input->word && input->word->clue != input->clue)
       return 1;  // incorrect
   }
